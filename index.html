@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мої улюблені посилання</title>
+<!-- Стилі з W3Schools для красивого вигляду -->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+body { background-color: #f4f4f9; max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif; }
+.category-title { text-transform: uppercase; letter-spacing: 1px; margin-top: 30px; font-weight: bold; }
+.link-item { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<h2 class="w3-center w3-animate-top" style="margin-top:40px;">⭐ Моя збірка посилань</h2>
+<div id="content" class="w3-container">Завантаження посилань...</div>
+
+<script>
+// СЮДИ ВСТАВ СВОЄ ПОСИЛАННЯ З GOOGLE (ОБОВ'ЯЗКОВО З OUTPUT=CSV В КІНЦІ)
+const csvUrl = https://docs.google.com/spreadsheets/d/e/2PACX-1vTMwXpOtpoMZrOLeDORrJDfhcLJqbAtlHLs8dk0s4dDoMNlho4mlSg_AsoXM9I6UIg-W3PS14fQPBjM/pub?output=csv;
+
+async function loadLinks() {
+try {
+const response = await fetch(csvUrl);
+const data = await response.text();
+
+// Розбиваємо CSV на рядки
+const rows = data.split("\n").map(row => row.split(","));
+const categories = {};
+
+// Проходимо по рядках, пропускаючи заголовок (i = 1)
+for (let i = 1; i < rows.length; i++) {
+if (!rows[i] || rows[i].length < 3) continue;
+const [category, title, url] = rows[i];
+if (!category || !title || !url) continue;
+
+const cleanCategory = category.trim();
+if (!categories[cleanCategory]) {
+categories[cleanCategory] = [];
+}
+categories[cleanCategory].push({
+title: title.trim(),
+url: url.trim()
+});
+}
+
+const contentDiv = document.getElementById("content");
+contentDiv.innerHTML = ""; 
+
+// Виводимо посортовані по категоріях посилання
+for (const category in categories) {
+let html = `<h3 class="category-title w3-text-teal">${category}</h3><div class="w3-ul w3-card w3-white w3-round">`;
+
+categories[category].forEach(link => {
+html += `
+<li class="w3-padding-large link-item">
+<a href="${link.url}" target="_blank" class="w3-text-indigo w3-hover-text-blue" style="text-decoration:none; font-weight:600;">
+🔗 ${link.title}
+</a>
+<span class="w3-small w3-text-grey w3-hide-small">${link.url.replace('https://', '')}</span>
+</li>`;
+});
+
+html += `</div>`;
+contentDiv.innerHTML += html;
+}
+
+} catch (error) {
+document.getElementById("content").innerHTML = "<p class='w3-text-red w3-center'>Помилка завантаження даних. Перевірте публікацію таблиці.</p>";
+console.error(error);
+}
+}
+
+loadLinks();
+</script>
+</body>
+</html>
