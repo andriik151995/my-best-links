@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Мої улюблені посилання</title>
-<!-- Стилі з W3Schools для красивого вигляду -->
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <style>
 body { background-color: #f4f4f9; max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif; }
@@ -14,65 +13,131 @@ body { background-color: #f4f4f9; max-width: 800px; margin: 0 auto; padding: 20p
 </head>
 <body>
 
-<h2 class="w3-center w3-animate-top" style="margin-top:40px;">⭐ Моя збірка посилань</h2>
+<h2 class="w3-center" style="margin-top:40px;">⭐ Моя збірка посилань</h2>
+
+<!-- ФОРМА ДЛЯ ДОДАВАННЯ НОВИХ ПОСИЛАНЬ -->
+<div class="w3-card-4 w3-white w3-padding w3-round" style="margin-bottom: 40px;">
+<h4 class="w3-text-teal" style="margin-top:0;">Додати нове посилання:</h4>
+<form id="linkForm" class="w3-container">
+<p>
+<label>Категорія</label>
+<input class="w3-input w3-border w3-round" type="text" id="categoryInput" placeholder="Наприклад: Навчання" required>
+</p>
+<p>
+<label>Назва сайту</label>
+<input class="w3-input w3-border w3-round" type="text" id="titleInput" placeholder="Наприклад: GitHub" required>
+</p>
+<p>
+<label>Посилання (URL)</label>
+<input class="w3-input w3-border w3-round" type="url" id="urlInput" placeholder="https://..." required>
+</p>
+<button type="submit" class="w3-button w3-teal w3-round w3-right" style="margin-bottom:10px;">Зберегти</button>
+</form>
+</div>
+
+<hr>
+
+<!-- ТУТ ВИВОДЯТЬСЯ ПОСИЛАННЯ -->
 <div id="content" class="w3-container">Завантаження посилань...</div>
 
 <script>
-// СЮДИ ВСТАВ СВОЄ ПОСИЛАННЯ З GOOGLE (ОБОВ'ЯЗКОВО З OUTPUT=CSV В КІНЦІ)
-const csvUrl = https://docs.google.com/spreadsheets/d/e/2PACX-1vTMwXpOtpoMZrOLeDORrJDfhcLJqbAtlHLs8dk0s4dDoMNlho4mlSg_AsoXM9I6UIg-W3PS14fQPBjM/pub?output=csv;
+// ⚠️ ВСТАВ СЮДИ СВОЄ ПОСИЛАННЯ З SHEETDB
+const apiSecretUrl = "ВСТАВ_СЮДИ_API_URL_З_SHEETDB";
 
+// 1. ФУНКЦІЯ ЧИТАННЯ ДАНИХ З ТАБЛИЦІ
 async function loadLinks() {
 try {
-const response = await fetch(csvUrl);
-const data = await response.text();
+const response = await fetch(apiSecretUrl);
+const data = await response.json(); // Отримуємо чистий JSON
 
-// Розбиваємо CSV на рядки
-const rows = data.split("\n").map(row => row.split(","));
 const categories = {};
 
-// Проходимо по рядках, пропускаючи заголовок (i = 1)
-for (let i = 1; i < rows.length; i++) {
-if (!rows[i] || rows[i].length < 3) continue;
-const [category, title, url] = rows[i];
-if (!category || !title || !url) continue;
+data.forEach(row => {
+// Перевіряємо, чи в таблиці є назви колонок Category, Title, URL (регістр важливий!)
+const category = row.Category || row.category;
+const title = row.Title || row.title;
+const url = row.URL || row.url;
+
+if (!category || !title || !url) return;
 
 const cleanCategory = category.trim();
 if (!categories[cleanCategory]) {
 categories[cleanCategory] = [];
 }
-categories[cleanCategory].push({
-title: title.trim(),
-url: url.trim()
+categories[cleanCategory].push({ title: title.trim(), url: url.trim() });
 });
-}
 
 const contentDiv = document.getElementById("content");
 contentDiv.innerHTML = ""; 
 
-// Виводимо посортовані по категоріях посилання
+if (Object.keys(categories).length === 0) {
+contentDiv.innerHTML = "<p class='w3-center w3-text-grey'>Таблиця порожня або назви колонок не збігаються.</p>";
+return;
+}
+
 for (const category in categories) {
 let html = `<h3 class="category-title w3-text-teal">${category}</h3><div class="w3-ul w3-card w3-white w3-round">`;
-
 categories[category].forEach(link => {
 html += `
 <li class="w3-padding-large link-item">
 <a href="${link.url}" target="_blank" class="w3-text-indigo w3-hover-text-blue" style="text-decoration:none; font-weight:600;">
 🔗 ${link.title}
 </a>
-<span class="w3-small w3-text-grey w3-hide-small">${link.url.replace('https://', '')}</span>
+<span class="w3-small w3-text-grey w3-hide-small">${link.url}</span>
 </li>`;
 });
-
 html += `</div>`;
 contentDiv.innerHTML += html;
 }
-
 } catch (error) {
-document.getElementById("content").innerHTML = "<p class='w3-text-red w3-center'>Помилка завантаження даних. Перевірте публікацію таблиці.</p>";
+document.getElementById("content").innerHTML = "<p class='w3-text-red w3-center'>Помилка завантаження даних.</p>";
 console.error(error);
 }
 }
 
+// 2. ФУНКЦІЯ НАДІСЛАННЯ ДАНИХ У ТАБЛИЦЮ
+document.getElementById('linkForm').addEventListener('submit', async function(e) {
+e.preventDefault(); // Зупиняємо перезавантаження сторінки
+
+const category = document.getElementById('categoryInput').value;
+const title = document.getElementById('titleInput').value;
+const url = document.getElementById('urlInput').value;
+
+// Формуємо об'єкт (назви ключів мають бути такі ж, як перші рядки в таблиці!)
+const newRow = {
+data: [
+{
+Category: category,
+Title: title,
+URL: url
+}
+]
+};
+
+try {
+const response = await fetch(apiSecretUrl, {
+method: 'POST',
+headers: {
+'Accept': 'application/json',
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(newRow)
+});
+
+if(response.ok) {
+// Очищаємо форму після успішного відправлення
+document.getElementById('linkForm').reset();
+// Перезавантажуємо список посилань, щоб побачити нове
+loadLinks();
+} else {
+alert("Щось пішло не так при збереженні.");
+}
+} catch (error) {
+console.error("Помилка:", error);
+}
+});
+
+// Запуск при завантаженні сторінки
 loadLinks();
 </script>
 </body>
