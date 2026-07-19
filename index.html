@@ -12,20 +12,21 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 .sidebar a { padding: 12px 24px; text-decoration: none; display: block; color: #a2aab2; transition: 0.3s; font-size: 15px; }
 .sidebar a:hover, .sidebar a.active { background-color: #2e3e52; color: #fff; }
 .main-content { margin-left: 250px; padding: 30px; min-height: 100vh; background-color: #f8f9fa; display: block; }
-.link-card { transition: transform 0.2s, box-shadow 0.2s; border-left: 4px solid #3b7ddd; background: #fff; margin-bottom: 20px; }
+.link-card { position: relative; transition: transform 0.2s, box-shadow 0.2s; border-left: 4px solid #3b7ddd; background: #fff; margin-bottom: 20px; }
 .link-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08)!important; }
 
-/* Стиль для екрану блокування */
-#authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #222e3c; z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; text-align: center; }
+/* Кнопка видалення у кутку картки */
+.delete-btn { position: absolute; top: 10px; right: 10px; color: #d9534f; cursor: pointer; opacity: 0.3; transition: opacity 0.2s; }
+.link-card:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { color: #c9302c; }
 
-@media screen and (max-width: 768px) {
-.sidebar { width: 100%; height: auto; position: relative; }
-.main-content { margin-left: 0; padding: 15px; }
-}
+#authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #222e3c; z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; text-align: center; }
+@media screen and (max-width: 768px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; padding: 15px; } }
 </style>
 </head>
 <body>
 
+<!-- ЕКРАН АВТОРИЗАЦІЇ -->
 <div id="authOverlay">
 <div class="w3-card-4 w3-dark-grey w3-padding w3-round-large" style="width: 90%; max-width: 400px; margin: auto; margin-top: 15vh;">
 <h3 class="w3-center"><i class="fa fa-lock w3-margin-right"></i>Вхід у кабінет</h3>
@@ -34,26 +35,27 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 <input class="w3-input w3-border w3-round w3-text-black" type="password" id="passwordInput" placeholder="Пароль" style="text-align: center;">
 <button onclick="checkPassword()" class="w3-button w3-blue w3-block w3-round w3-margin-top" style="font-weight: 600;">Увійти</button>
 </div>
-<p id="authError" class="w3-text-red w3-small" style="display:none;">Невірний пароль! Спробуйте ще раз.</p>
+<p id="authError" class="w3-text-red w3-small" style="display:none;">Невірний пароль!</p>
 </div>
 </div>
 
+<!-- БОКОВА ПАНЕЛЬ -->
 <div class="sidebar w3-card" id="mySidebar">
 <div class="w3-padding w3-text-white w3-large w3-border-bottom w3-border-dark-grey" style="font-weight: bold; margin-bottom: 20px;">
 <i class="fa fa-sliders w3-margin-right"></i>BookmarkApp
 </div>
 <div id="categoryMenu">
-<p class="w3-padding w3-small w3-text-grey">Завантаження меню...</p>
+<p class="w3-padding w3-small w3-text-grey">Завантаження...</p>
 </div>
 </div>
 
+<!-- ОСНОВНИЙ КОНТЕНТ -->
 <div class="main-content">
-
 <div class="w3-container w3-white w3-card-2 w3-round w3-padding w3-margin-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
 <h2 class="w3-margin-0" style="font-weight: 600; color: #3b7ddd; font-size: 24px;">
 <i class="fa fa-bookmark-o w3-margin-right"></i>Моя робоча панель
 </h2>
-<button onclick="document.getElementById('addModal').style.display='block'" class="w3-button w3-blue w3-round-large w3-margin-top w3-margin-bottom">
+<button onclick="document.getElementById('addModal').style.display='block'" class="w3-button w3-blue w3-round-large">
 <i class="fa fa-plus w3-margin-right"></i>Додати закладку
 </button>
 </div>
@@ -63,6 +65,7 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 </div>
 </div>
 
+<!-- МОДАЛЬНЕ ВІКНО -->
 <div id="addModal" class="w3-modal">
 <div class="w3-modal-content w3-card-4 w3-animate-zoom w3-round-large" style="max-width:550px;">
 <header class="w3-container w3-blue w3-padding-16 w3-round-large" style="border-bottom-left-radius:0; border-bottom-right-radius:0;"> 
@@ -73,7 +76,7 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 <form id="linkForm" class="w3-container w3-padding-24 w3-white w3-round-large" style="border-top-left-radius:0; border-top-right-radius:0;">
 <p>
 <label><i class="fa fa-folder-open w3-margin-right"></i>Категорія</label>
-<input class="w3-input w3-border w3-round" type="text" id="categoryInput" placeholder="Наприклад: Розробка, Дизайн" required>
+<input class="w3-input w3-border w3-round" type="text" id="categoryInput" placeholder="Наприклад: Розробка" required>
 </p>
 <p>
 <label><i class="fa fa-font w3-margin-right"></i>Назва сайту</label>
@@ -88,7 +91,7 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 <input class="w3-input w3-border w3-round" type="text" id="descInput" placeholder="Що це за сайт?">
 </p>
 <p>
-<label><i class="fa fa-star w3-margin-right"></i>Ваша оцінка (Рейтинг 1-5)</label>
+<label><i class="fa fa-star w3-margin-right"></i>Ваша оцінка</label>
 <select class="w3-select w3-border w3-round" id="ratingInput">
 <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
 <option value="4">⭐⭐⭐⭐ (4/5)</option>
@@ -106,52 +109,41 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 </div>
 
 <script>
-// ⚠️ ВСТАВ СЮДИ СВОЄ НОВЕ ПОСИЛАННЯ З SHEETDB (ЯКЩО ТИ ЙОГО ПЕРЕСТВОРЮВАВ)
-const apiSecretUrl = "https://sheetdb.io/api/v1/u2rm98dn6i16i";
-
-// ⚠️ ТВОЙ ПАРОЛЬ ДЛЯ ВХОДУ (Можеш змінити на свій будь-який слово)
+// ⚠️ ВСТАВ СЮДИ СВОЄ АКТУАЛЬНЕ ПОСИЛАННЯ З SHEETDB
+const apiSecretUrl = "https://sheetdb.io/api/v1/x12v2eesnvraf";
 const CORRECT_PASSWORD = "admin"; 
 
 let allLinks = [];
 
-// ФУНКЦІЯ ПЕРЕВІРКИ ПАРОЛЮ
 function checkPassword() {
 const enteredPassword = document.getElementById("passwordInput").value;
 if (enteredPassword === CORRECT_PASSWORD) {
-document.getElementById("authOverlay").style.display = "none"; // Ховаємо екран блокування
-loadLinks(); // Завантажуємо дані таблиці
+document.getElementById("authOverlay").style.display = "none";
+loadLinks();
 } else {
-document.getElementById("authError").style.display = "block"; // Показуємо помилку
+document.getElementById("authError").style.display = "block";
 }
 }
 
-// Також дозволяємо вхід по натисканню клавіші Enter
 document.getElementById("passwordInput").addEventListener("keyup", function(event) {
-if (event.key === "Enter") {
-checkPassword();
-}
+if (event.key === "Enter") checkPassword();
 });
 
-// 1. ЗАВАНТАЖЕННЯ ДАНИХ З ТАБЛИЦІ
 async function loadLinks() {
 try {
-document.getElementById("linksGrid").innerHTML = "<p class='w3-center w3-text-grey'>Синхронізація з Google Таблицею...</p>";
+document.getElementById("linksGrid").innerHTML = "<p class='w3-center w3-text-grey'>Синхронізація з базою...</p>";
 const response = await fetch(apiSecretUrl);
 allLinks = await response.json();
 
-if (!Array.isArray(allLinks)) {
-document.getElementById("linksGrid").innerHTML = "<p class='w3-center w3-text-red'>Помилка: SheetDB повернув некоректні дані.</p>";
-return;
-}
+if (!Array.isArray(allLinks)) return;
 
 renderMenu();
 renderLinks('all'); 
 } catch (error) {
-document.getElementById("linksGrid").innerHTML = "<p class='w3-text-red w3-center'>Помилка підключення до бази даних.</p>";
+document.getElementById("linksGrid").innerHTML = "<p class='w3-text-red w3-center'>Помилка підключення.</p>";
 }
 }
 
-// 2. ВІДМАЛЬОВКА МЕНЮ КАТЕГОРІЙ
 function renderMenu() {
 const menuDiv = document.getElementById("categoryMenu");
 const categories = new Set();
@@ -162,15 +154,12 @@ if (cat) categories.add(cat.toString().trim());
 });
 
 let menuHtml = `<a href="#" onclick="filterCategory('all', this)" class="w3-bar-item active"><i class="fa fa-th w3-margin-right"></i>Всі закладки</a>`;
-
 categories.forEach(cat => {
 menuHtml += `<a href="#" onclick="filterCategory('${cat}', this)" class="w3-bar-item"><i class="fa fa-folder-o w3-margin-right"></i>${cat}</a>`;
 });
-
 menuDiv.innerHTML = menuHtml;
 }
 
-// 3. ФІЛЬТР КАТЕГОРІЙ
 function filterCategory(cat, element) {
 const links = document.getElementById("categoryMenu").getElementsByTagName("a");
 for(let i=0; i<links.length; i++) links[i].classList.remove("active");
@@ -178,7 +167,6 @@ element.classList.add("active");
 renderLinks(cat);
 }
 
-// 4. ГЕНЕРАЦІЯ КАРТОК ЗАКЛАДОК
 function renderLinks(filter) {
 const grid = document.getElementById("linksGrid");
 grid.innerHTML = "";
@@ -197,15 +185,19 @@ if (!title || !url) return;
 count++;
 let stars = "⭐".repeat(rating);
 
+// Додано іконку з функцією deleteLink
 grid.innerHTML += `
-<div class="w3-col l4 m6 w3-margin-bottom">
+<div class="w3-col l4 m6 w3-margin-bottom" id="card-${btoa(encodeURIComponent(title))}">
 <div class="w3-card w3-white w3-padding w3-round-large link-card">
-<span class="w3-tag w3-small w3-light-grey w3-text-grey w3-round w3-right" style="padding: 3px 8px;">${category}</span>
+<span class="delete-btn" onclick="deleteLink('${title}')" title="Видалити закладку">
+<i class="fa fa-trash"></i>
+</span>
+<span class="w3-tag w3-small w3-light-grey w3-text-grey w3-round w3-right" style="padding: 3px 8px; margin-right: 20px;">${category}</span>
 <h4 class="w3-text-dark-grey" style="font-weight:600; margin-top:5px; margin-bottom:5px; font-size:18px;">${title}</h4>
 <div class="w3-small w3-text-amber w3-margin-bottom">${stars}</div>
 <p class="w3-small w3-text-grey" style="height:40px; overflow:hidden; margin-bottom:15px;">${desc}</p>
-<a href="${url}" target="_blank" class="w3-button w3-blue w3-text-white w3-block w3-round w3-small" style="font-weight:600; text-decoration:none;">
-<i class="fa fa-external-link w3-margin-right"></i>Відкрити сайт
+<a href="${url}" target="_blank" class="w3-button w3-blue w3-block w3-round w3-small" style="font-weight:600; text-decoration:none;">
+<i class="fa fa-external-link w3-margin-right"></i>Відкрити
 </a>
 </div>
 </div>`;
@@ -216,10 +208,33 @@ grid.innerHTML = "<div class='w3-container w3-center w3-text-grey w3-padding-64'
 }
 }
 
-// 5. ВІДПРАВЛЕННЯ ДАНИХ
+// НОВА ФУНКЦІЯ ДЛЯ ВИДАЛЕННЯ ЗАКЛАДКИ ЧЕРЕЗ API
+async function deleteLink(title) {
+if (!confirm(`Ви впевнені, що хочете видалити закладку "${title}"?`)) return;
+
+// SheetDB дозволяє видаляти рядки, вказуючи назву колонки та значення в URL: /Title/Назва
+const deleteUrl = `${apiSecretUrl}/Title/${encodeURIComponent(title)}`;
+
+try {
+const response = await fetch(deleteUrl, {
+method: 'DELETE',
+headers: { 'Content-Type': 'application/json' }
+});
+
+if (response.ok) {
+// Перезавантажуємо дані, щоб оновити інтерфейс
+loadLinks();
+} else {
+alert("Помилка видалення. Перевірте, чи включено дозвіл Delete (DELETE) у налаштуваннях SheetDB!");
+}
+} catch (error) {
+console.error("Помилка:", error);
+alert("Не вдалося зв'язатися з сервером.");
+}
+}
+
 document.getElementById('linkForm').addEventListener('submit', async function(e) {
 e.preventDefault();
-
 const category = document.getElementById('categoryInput').value;
 const title = document.getElementById('titleInput').value;
 const url = document.getElementById('urlInput').value;
@@ -231,7 +246,7 @@ data: [{
 Category: category, category: category,
 Title: title, title: title,
 URL: url, url: url,
-Description: desc, description: desc, desc: desc,
+Description: desc, description: desc,
 Rating: rating, rating: rating
 }]
 };
@@ -248,7 +263,7 @@ document.getElementById('linkForm').reset();
 document.getElementById('addModal').style.display='none'; 
 loadLinks(); 
 } else {
-alert("Помилка додавання. Перевірте, чи створено нове API в SheetDB після оновлення колонок!");
+alert("Помилка додавання.");
 }
 } catch (error) {
 console.error(error);
