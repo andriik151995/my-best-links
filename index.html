@@ -15,7 +15,7 @@ body { background-color: #f4f4f9; max-width: 800px; margin: 0 auto; padding: 20p
 
 <h2 class="w3-center" style="margin-top:40px;">⭐ Моя збірка посилань</h2>
 
-<!-- ФОРМА ДЛЯ ДОДАВАННЯ НОВИХ ПОСИЛАНЬ -->
+<!-- ФОРМА ДЛЯ ДОДАВАННЯ -->
 <div class="w3-card-4 w3-white w3-padding w3-round" style="margin-bottom: 40px;">
 <h4 class="w3-text-teal" style="margin-top:0;">Додати нове посилання:</h4>
 <form id="linkForm" class="w3-container">
@@ -41,37 +41,42 @@ body { background-color: #f4f4f9; max-width: 800px; margin: 0 auto; padding: 20p
 <div id="content" class="w3-container">Завантаження посилань...</div>
 
 <script>
-// ⚠️ ВСТАВ СЮДИ СВОЄ ПОСИЛАННЯ З SHEETDB
-const apiSecretUrl = https://sheetdb.io/api/v1/xl2v2eesnvraf;
+// ⚠️ ВСТАВТЕ СЮДИ ВАШЕ ПОСИЛАННЯ З SHEETDB
+const apiSecretUrl = "https://sheetdb.io/api/v1/x12v2eesnvraf";
 
-// 1. ФУНКЦІЯ ЧИТАННЯ ДАНИХ З ТАБЛИЦІ
+// 1. ЧИТАННЯ ДАНИХ
 async function loadLinks() {
 try {
 const response = await fetch(apiSecretUrl);
-const data = await response.json(); // Отримуємо чистий JSON
+const data = await response.json();
 
 const categories = {};
 
+if (!Array.isArray(data)) {
+document.getElementById("content").innerHTML = "<p class='w3-center w3-text-red'>Помилка конфігурації бази даних.</p>";
+return;
+}
+
 data.forEach(row => {
-// Перевіряємо, чи в таблиці є назви колонок Category, Title, URL (регістр важливий!)
-const category = row.Category || row.category;
-const title = row.Title || row.title;
-const url = row.URL || row.url;
+// Цей рядок автоматично знаходить колонку, навіть якщо вона написана як Category, category, CATEGORY тощо.
+const category = row.Category || row.category || row.CATEGORY || Object.values(row)[0];
+const title = row.Title || row.title || row.TITLE || Object.values(row)[1];
+const url = row.URL || row.url || row.url || Object.values(row)[2];
 
 if (!category || !title || !url) return;
 
-const cleanCategory = category.trim();
+const cleanCategory = category.toString().trim();
 if (!categories[cleanCategory]) {
 categories[cleanCategory] = [];
 }
-categories[cleanCategory].push({ title: title.trim(), url: url.trim() });
+categories[cleanCategory].push({ title: title.toString().trim(), url: url.toString().trim() });
 });
 
 const contentDiv = document.getElementById("content");
 contentDiv.innerHTML = ""; 
 
 if (Object.keys(categories).length === 0) {
-contentDiv.innerHTML = "<p class='w3-center w3-text-grey'>Таблиця порожня або назви колонок не збігаються.</p>";
+contentDiv.innerHTML = "<p class='w3-center w3-text-grey'>Немає збережених посилань. Додайте перше!</p>";
 return;
 }
 
@@ -95,21 +100,24 @@ console.error(error);
 }
 }
 
-// 2. ФУНКЦІЯ НАДІСЛАННЯ ДАНИХ У ТАБЛИЦЮ
+// 2. ВІДПРАВЛЕННЯ ДАНИХ ДЛЯ БУДЬ-ЯКОГО РЕГІСТРУ КОЛОНОК
 document.getElementById('linkForm').addEventListener('submit', async function(e) {
-e.preventDefault(); // Зупиняємо перезавантаження сторінки
+e.preventDefault();
 
 const category = document.getElementById('categoryInput').value;
 const title = document.getElementById('titleInput').value;
 const url = document.getElementById('urlInput').value;
 
-// Формуємо об'єкт (назви ключів мають бути такі ж, як перші рядки в таблиці!)
+// Відправляємо дані одразу у двох форматах (з великої та малої літери), щоб SheetDB точно прийняв їх
 const newRow = {
 data: [
 {
 Category: category,
+category: category,
 Title: title,
-URL: url
+title: title,
+URL: url,
+url: url
 }
 ]
 };
@@ -125,19 +133,16 @@ body: JSON.stringify(newRow)
 });
 
 if(response.ok) {
-// Очищаємо форму після успішного відправлення
 document.getElementById('linkForm').reset();
-// Перезавантажуємо список посилань, щоб побачити нове
 loadLinks();
 } else {
-alert("Щось пішло не так при збереженні.");
+alert("Помилка SheetDB: сервер відхилив запит.");
 }
 } catch (error) {
 console.error("Помилка:", error);
 }
 });
 
-// Запуск при завантаженні сторінки
 loadLinks();
 </script>
 </body>
