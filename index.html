@@ -30,6 +30,9 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 .site-favicon { width: 24px; height: 24px; border-radius: 4px; margin-right: 10px; vertical-align: middle; object-fit: contain; }
 .card-header-flex { display: flex; align-items: center; margin-top: 5px; margin-bottom: 5px; max-width: 85%; }
 
+/* Контейнер для нижніх кнопок картки */
+.card-buttons-grid { display: grid; grid-template-columns: 3fr 1fr; gap: 8px; }
+
 @media screen and (max-width: 768px) { 
 .sidebar { width: 100%; height: auto; position: relative; } 
 .main-content { margin-left: 0; padding: 15px; }
@@ -126,7 +129,7 @@ body { background-color: #f8f9fa; font-family: "Segoe UI", Tahoma, Geneva, Verda
 </div>
 
 <script>
-const apiSecretUrl = "https://sheetdb.io/api/v1/u2rm98dn6i16i";
+const apiSecretUrl = "https:https://sheetdb.io/api/v1/u2rm98dn6i16i";
 const CORRECT_PASSWORD = "admin"; 
 
 let allLinks = [];
@@ -193,7 +196,7 @@ const grid = document.getElementById("linksGrid");
 grid.innerHTML = "";
 let count = 0;
 
-allLinks.forEach(row => {
+allLinks.forEach((row, index) => {
 const category = (row.Category || row.category || Object.values(row)[0] || "").toString().trim();
 const title = (row.Title || row.title || Object.values(row)[1] || "").toString().trim();
 const url = (row.URL || row.url || Object.values(row)[2] || "").toString().trim();
@@ -206,13 +209,8 @@ if (!title || !url) return;
 count++;
 let stars = "⭐".repeat(rating);
 
-// Отримуємо домен із посилання сайту для іконки Google Favicon API
 let domain = "";
-try {
-domain = new URL(url).hostname;
-} catch(e) {
-domain = "";
-}
+try { domain = new URL(url).hostname; } catch(e) { domain = ""; }
 const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64` : "";
 
 grid.innerHTML += `
@@ -230,9 +228,15 @@ ${faviconUrl ? `<img src="${faviconUrl}" class="site-favicon" alt="ico" onerror=
 
 <div class="w3-small w3-text-amber w3-margin-bottom">${stars}</div>
 <p class="w3-small w3-text-grey" style="height:40px; overflow:hidden; margin-bottom:15px;">${desc}</p>
+
+<div class="card-buttons-grid">
 <a href="${url}" target="_blank" class="w3-button w3-blue w3-block w3-round w3-small" style="font-weight:600; text-decoration:none;">
 <i class="fa fa-external-link w3-margin-right"></i>Відкрити
 </a>
+<button id="copyBtn-${index}" onclick="copyToClipboard('${url}', ${index})" class="w3-button w3-light-grey w3-block w3-round w3-small w3-text-dark-grey" style="font-weight:600; padding: 5px 0;" title="Скопіювати посилання">
+<i class="fa fa-clone"></i>
+</button>
+</div>
 </div>
 </div>`;
 });
@@ -240,6 +244,28 @@ ${faviconUrl ? `<img src="${faviconUrl}" class="site-favicon" alt="ico" onerror=
 if(count === 0) {
 grid.innerHTML = "<div class='w3-container w3-center w3-text-grey w3-padding-64'><h4>У цій категорії немає закладок</h4></div>";
 }
+}
+
+// НОВА ФУНКЦІЯ ДЛЯ КОПІЮВАННЯ В БУФЕР ОБМІНУ З АНІМАЦІЄЮ КНОПКИ
+function copyToClipboard(url, index) {
+navigator.clipboard.writeText(url).then(() => {
+const btn = document.getElementById(`copyBtn-${index}`);
+const originalHtml = btn.innerHTML;
+
+// Змінюємо стиль кнопки на зелений та міняємо іконку на галочку
+btn.classList.remove('w3-light-grey', 'w3-text-dark-grey');
+btn.classList.add('w3-green');
+btn.innerHTML = `<i class="fa fa-check"></i> <span style="font-size:10px;">Ок!</span>`;
+
+// Через 1.5 секунди повертаємо все у початковий вигляд
+setTimeout(() => {
+btn.classList.remove('w3-green');
+btn.classList.add('w3-light-grey', 'w3-text-dark-grey');
+btn.innerHTML = originalHtml;
+}, 1500);
+}).catch(err => {
+console.error('Не вдалося скопіювати: ', err);
+});
 }
 
 function liveSearch() {
